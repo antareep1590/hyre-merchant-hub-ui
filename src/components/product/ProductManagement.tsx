@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Eye, X, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Trash2, Eye, X, Check, ChevronDown, ChevronUp, Upload } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ProductDetail } from './ProductDetail';
+import { ProductFilters } from './ProductFilters';
 
 interface Product {
   id: number;
@@ -24,6 +26,7 @@ interface Product {
   lastUpdated: string;
   description?: string;
   sku?: string;
+  price?: string;
   dosageOptions?: { name: string; price: string; isDefault: boolean }[];
 }
 
@@ -31,6 +34,8 @@ export function ProductManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingProduct, setEditingProduct] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
   const [products, setProducts] = useState<Product[]>([
     {
       id: 1,
@@ -42,6 +47,7 @@ export function ProductManagement() {
       lastUpdated: '2 days ago',
       description: 'Comprehensive weight management program with medical supervision',
       sku: 'SEM-WM-001',
+      price: '200',
       dosageOptions: [
         { name: '0.25mg', price: '200', isDefault: true },
         { name: '0.5mg', price: '300', isDefault: false },
@@ -58,6 +64,7 @@ export function ProductManagement() {
       lastUpdated: '1 week ago',
       description: 'Personalized hormone optimization for men',
       sku: 'TRT-HT-002',
+      price: '150',
       dosageOptions: [
         { name: '100mg/week', price: '150', isDefault: true },
         { name: '150mg/week', price: '200', isDefault: false },
@@ -69,12 +76,15 @@ export function ProductManagement() {
 
   const [newProduct, setNewProduct] = useState<Partial<Product>>({
     name: '',
-    category: '',
+    category: 'Weight Loss',
     description: '',
     sku: '',
+    price: '',
     status: 'draft',
     dosageOptions: []
   });
+
+  const categories = ['Weight Loss', 'Hormone Therapy', 'Skincare', 'Recovery', 'Wellness'];
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -83,6 +93,10 @@ export function ProductManagement() {
 
   const handleEditProduct = (productId: number) => {
     setEditingProduct(editingProduct === productId ? null : productId);
+  };
+
+  const handleViewProduct = (product: Product) => {
+    setViewingProduct(product);
   };
 
   const handleSaveProduct = (productId: number, updatedData: Partial<Product>) => {
@@ -100,16 +114,17 @@ export function ProductManagement() {
         category: newProduct.category,
         description: newProduct.description || '',
         sku: newProduct.sku || `${newProduct.name?.slice(0, 3).toUpperCase()}-${Date.now()}`,
+        price: newProduct.price || '0',
         priceRange: newProduct.dosageOptions?.length ? 
           `$${Math.min(...newProduct.dosageOptions.map(d => parseInt(d.price)))} - $${Math.max(...newProduct.dosageOptions.map(d => parseInt(d.price)))}` 
-          : '$0',
+          : `$${newProduct.price || '0'}`,
         status: newProduct.status as 'active' | 'draft' | 'inactive',
         dosages: newProduct.dosageOptions?.length || 0,
         lastUpdated: 'Just now',
         dosageOptions: newProduct.dosageOptions || []
       };
       setProducts([...products, product]);
-      setNewProduct({ name: '', category: '', description: '', sku: '', status: 'draft', dosageOptions: [] });
+      setNewProduct({ name: '', category: 'Weight Loss', description: '', sku: '', price: '', status: 'draft', dosageOptions: [] });
       setShowAddForm(false);
     }
   };
@@ -157,11 +172,15 @@ export function ProductManagement() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-              <Input 
+              <select 
                 value={formData.category || ''} 
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="border-gray-300 focus:ring-blue-500"
-              />
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {categories.map((category) => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">SKU</label>
@@ -169,6 +188,16 @@ export function ProductManagement() {
                 value={formData.sku || ''} 
                 onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
                 className="border-gray-300 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Base Price</label>
+              <Input 
+                type="number"
+                value={formData.price || ''} 
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                className="border-gray-300 focus:ring-blue-500"
+                placeholder="Base product price"
               />
             </div>
             <div>
@@ -197,8 +226,10 @@ export function ProductManagement() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors cursor-pointer">
+                <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
                 <p className="text-gray-500">Click to upload image</p>
+                <input type="file" className="hidden" accept="image/*" />
               </div>
             </div>
           </div>
@@ -297,10 +328,23 @@ export function ProductManagement() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
-                  <Input 
-                    value={newProduct.category || ''} 
+                  <select 
+                    value={newProduct.category || 'Weight Loss'} 
                     onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                    placeholder="Enter category"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {categories.map((category) => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Base Price</label>
+                  <Input 
+                    type="number"
+                    value={newProduct.price || ''} 
+                    onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                    placeholder="Base product price"
                   />
                 </div>
               </div>
@@ -321,6 +365,14 @@ export function ProductManagement() {
                     onChange={(e) => setNewProduct({ ...newProduct, sku: e.target.value })}
                     placeholder="Auto-generated if empty"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors cursor-pointer">
+                    <Upload className="mx-auto h-6 w-6 text-gray-400 mb-1" />
+                    <p className="text-sm text-gray-500">Click to upload</p>
+                    <input type="file" className="hidden" accept="image/*" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -350,7 +402,11 @@ export function ProductManagement() {
               />
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                className="flex items-center space-x-2"
+                onClick={() => setShowFilters(true)}
+              >
                 <Filter className="h-4 w-4" />
                 <span>Filter</span>
               </Button>
@@ -399,7 +455,11 @@ export function ProductManagement() {
                       <TableCell className="text-gray-500">{product.lastUpdated}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end space-x-1">
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleViewProduct(product)}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                           <Button 
@@ -434,6 +494,23 @@ export function ProductManagement() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modals */}
+      {viewingProduct && (
+        <ProductDetail 
+          product={viewingProduct} 
+          onClose={() => setViewingProduct(null)} 
+        />
+      )}
+
+      {showFilters && (
+        <ProductFilters 
+          onClose={() => setShowFilters(false)}
+          onApplyFilters={(filters) => {
+            console.log('Applying filters:', filters);
+          }}
+        />
+      )}
     </div>
   );
 }

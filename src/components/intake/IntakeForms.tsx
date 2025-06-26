@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Plus, Copy, Edit, Eye, Trash2 } from 'lucide-react';
+import { Plus, Copy, Edit, Eye, Trash2, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,15 +12,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+
+interface IntakeForm {
+  id: number;
+  name: string;
+  product: string;
+  questions: number;
+  lastModified: string;
+  status: 'active' | 'draft';
+}
 
 export function IntakeForms() {
-  const [forms] = useState([
+  const [forms, setForms] = useState<IntakeForm[]>([
     {
       id: 1,
       name: 'Weight Management Intake',
@@ -55,6 +58,87 @@ export function IntakeForms() {
     }
   ]);
 
+  const [editingForm, setEditingForm] = useState<IntakeForm | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+
+  const handleEditForm = (form: IntakeForm) => {
+    setEditingForm(form);
+  };
+
+  const handleCreateForm = () => {
+    setShowCreateForm(true);
+  };
+
+  const handleDuplicateGlobalForm = () => {
+    const newForm: IntakeForm = {
+      id: forms.length + 1,
+      name: 'Duplicated Global Form',
+      product: 'Select Product',
+      questions: 24,
+      lastModified: 'Just now',
+      status: 'draft'
+    };
+    setForms([...forms, newForm]);
+  };
+
+  const FormEditor = ({ form, onClose }: { form: IntakeForm; onClose: () => void }) => {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between p-6 border-b">
+            <h2 className="text-2xl font-bold text-gray-900">Edit Form: {form.name}</h2>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+          
+          <div className="p-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-4">Form Builder Interface</h3>
+              <p className="text-gray-600 mb-4">This would show the same question builder interface as the Questionnaire Builder</p>
+              
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-lg bg-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="secondary">Text Input</Badge>
+                      <Button size="sm" variant="ghost">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="font-medium">What is your current weight?</p>
+                    <p className="text-sm text-gray-500">Required field</p>
+                  </div>
+                  
+                  <div className="p-4 border rounded-lg bg-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="secondary">Multiple Choice</Badge>
+                      <Button size="sm" variant="ghost">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="font-medium">Have you tried weight loss medications before?</p>
+                    <p className="text-sm text-gray-500">Options: Yes, No, Not sure</p>
+                  </div>
+                  
+                  <Button variant="outline" className="w-full">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add New Question
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3">
+              <Button variant="outline" onClick={onClose}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700">Save Form</Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -64,11 +148,11 @@ export function IntakeForms() {
           <p className="text-gray-600">Create unique intake forms for each product</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleDuplicateGlobalForm}>
             <Copy className="h-4 w-4 mr-2" />
             Duplicate Global Form
           </Button>
-          <Button>
+          <Button onClick={handleCreateForm}>
             <Plus className="h-4 w-4 mr-2" />
             Create New Form
           </Button>
@@ -97,10 +181,6 @@ export function IntakeForms() {
               <Button size="sm" variant="outline">
                 <Edit className="h-4 w-4 mr-1" />
                 Edit Template
-              </Button>
-              <Button size="sm" variant="outline">
-                <Eye className="h-4 w-4 mr-1" />
-                Preview
               </Button>
             </div>
           </div>
@@ -143,31 +223,25 @@ export function IntakeForms() {
                     </TableCell>
                     <TableCell className="text-gray-500">{form.lastModified}</TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            •••
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white">
-                          <DropdownMenuItem className="flex items-center space-x-2">
-                            <Eye className="h-4 w-4" />
-                            <span>Preview Form</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="flex items-center space-x-2">
-                            <Edit className="h-4 w-4" />
-                            <span>Edit Form</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="flex items-center space-x-2">
-                            <Copy className="h-4 w-4" />
-                            <span>Duplicate</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="flex items-center space-x-2 text-red-600">
-                            <Trash2 className="h-4 w-4" />
-                            <span>Delete</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <div className="flex justify-end space-x-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEditForm(form)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={handleDuplicateGlobalForm}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-red-600">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -177,67 +251,13 @@ export function IntakeForms() {
         </CardContent>
       </Card>
 
-      {/* Form Builder Preview */}
-      <Card className="border-0 shadow-sm">
-        <CardHeader>
-          <CardTitle>Form Builder Preview</CardTitle>
-          <p className="text-sm text-gray-600">Click on any form above to edit</p>
-        </CardHeader>
-        <CardContent>
-          <div className="p-6 bg-gray-50 rounded-lg">
-            <div className="max-w-2xl mx-auto space-y-6">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-900">Weight Management Intake Form</h2>
-                <p className="text-gray-600 mt-2">Please complete this form before your consultation</p>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    What is your primary weight loss goal? *
-                  </label>
-                  <input 
-                    type="text" 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Your answer..."
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Have you tried weight loss medications before? *
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input type="radio" name="previous-meds" className="mr-2" />
-                      Yes, and they worked well
-                    </label>
-                    <label className="flex items-center">
-                      <input type="radio" name="previous-meds" className="mr-2" />
-                      Yes, but they didn't work
-                    </label>
-                    <label className="flex items-center">
-                      <input type="radio" name="previous-meds" className="mr-2" />
-                      No, this is my first time
-                    </label>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Current weight (lbs) *
-                  </label>
-                  <input 
-                    type="number" 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Enter weight"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Form Editor Modal */}
+      {editingForm && (
+        <FormEditor 
+          form={editingForm} 
+          onClose={() => setEditingForm(null)} 
+        />
+      )}
     </div>
   );
 }

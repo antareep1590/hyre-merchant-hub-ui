@@ -150,16 +150,11 @@ export function DashboardHome({ onNavigate }: DashboardHomeProps) {
           </CardContent>
         </Card>
 
-        {/* Recent Activity */}
+        {/* Recent Activity - Removed "View All" button */}
         <Card className="border-0 shadow-lg lg:col-span-4">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-xl font-bold text-gray-900">Recent Activity</CardTitle>
-                <p className="text-gray-600">Latest updates and actions</p>
-              </div>
-              <Button variant="outline" size="sm">View All</Button>
-            </div>
+            <CardTitle className="text-xl font-bold text-gray-900">Recent Activity</CardTitle>
+            <p className="text-gray-600">Latest updates and actions</p>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

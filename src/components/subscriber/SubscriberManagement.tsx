@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Search, Filter, Download, Eye, Mail, MoreHorizontal } from 'lucide-react';
+import { Search, Download, Eye } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,18 +13,25 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { PatientProfile } from './PatientProfile';
+
+interface Subscriber {
+  id: number;
+  name: string;
+  email: string;
+  products: string[];
+  status: string;
+  joinDate: string;
+  lastActivity: string;
+  totalSpent: string;
+}
 
 export function SubscriberManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [viewingPatient, setViewingPatient] = useState<Subscriber | null>(null);
 
-  const subscribers = [
+  const subscribers: Subscriber[] = [
     {
       id: 1,
       name: 'Sarah Johnson',
@@ -97,22 +104,38 @@ export function SubscriberManagement() {
     }
   };
 
+  const handleViewPatient = (patient: Subscriber) => {
+    setViewingPatient(patient);
+  };
+
+  const handleExportCSV = () => {
+    // Simulate CSV export
+    const csvData = filteredSubscribers.map(sub => 
+      `${sub.name},${sub.email},${sub.products.join(';')},${sub.status},${sub.joinDate},${sub.totalSpent}`
+    ).join('\n');
+    
+    const blob = new Blob([`Name,Email,Products,Status,Join Date,Total Spent\n${csvData}`], 
+      { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'subscribers.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Subscriber Management</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Patient Management</h1>
           <p className="text-gray-600">Manage your patients and subscribers</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleExportCSV}>
             <Download className="h-4 w-4 mr-2" />
             Export CSV
-          </Button>
-          <Button variant="outline">
-            <Mail className="h-4 w-4 mr-2" />
-            Send Email
           </Button>
         </div>
       </div>
@@ -174,10 +197,6 @@ export function SubscriberManagement() {
                 <option value="inactive">Inactive</option>
                 <option value="paused">Paused</option>
               </select>
-              <Button variant="outline">
-                <Filter className="h-4 w-4 mr-2" />
-                More Filters
-              </Button>
             </div>
           </div>
         </CardContent>
@@ -186,7 +205,7 @@ export function SubscriberManagement() {
       {/* Subscribers Table */}
       <Card className="border-0 shadow-sm">
         <CardHeader>
-          <CardTitle>Subscribers ({filteredSubscribers.length})</CardTitle>
+          <CardTitle>Patients ({filteredSubscribers.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -226,27 +245,13 @@ export function SubscriberManagement() {
                     <TableCell className="text-gray-500">{subscriber.lastActivity}</TableCell>
                     <TableCell className="font-medium">{subscriber.totalSpent}</TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white">
-                          <DropdownMenuItem className="flex items-center space-x-2">
-                            <Eye className="h-4 w-4" />
-                            <span>View Profile</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="flex items-center space-x-2">
-                            <Mail className="h-4 w-4" />
-                            <span>Send Message</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="flex items-center space-x-2">
-                            <Download className="h-4 w-4" />
-                            <span>Export Data</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleViewPatient(subscriber)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -255,6 +260,14 @@ export function SubscriberManagement() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Patient Profile Modal */}
+      {viewingPatient && (
+        <PatientProfile 
+          patient={viewingPatient} 
+          onClose={() => setViewingPatient(null)} 
+        />
+      )}
     </div>
   );
 }

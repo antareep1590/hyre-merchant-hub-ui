@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Plus, Edit, Trash2, GripVertical, Check, X } from 'lucide-react';
+import { Plus, Edit, Trash2, GripVertical, Check, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,10 +63,26 @@ export function CategoryManagement() {
     setCategories(categories.filter(cat => cat.id !== id));
   };
 
-  const unassignedProducts = [
-    { name: 'New Skincare Product', description: 'Recently added product' },
-    { name: 'Custom Peptide Mix', description: 'Specialized formulation' },
-  ];
+  const moveCategory = (categoryId: number, direction: 'up' | 'down') => {
+    const categoryIndex = categories.findIndex(c => c.id === categoryId);
+    if (
+      (direction === 'up' && categoryIndex > 0) ||
+      (direction === 'down' && categoryIndex < categories.length - 1)
+    ) {
+      const newCategories = [...categories];
+      const swapIndex = direction === 'up' ? categoryIndex - 1 : categoryIndex + 1;
+      
+      // Swap the categories
+      [newCategories[categoryIndex], newCategories[swapIndex]] = 
+      [newCategories[swapIndex], newCategories[categoryIndex]];
+      
+      // Update their order values
+      newCategories[categoryIndex].order = categoryIndex + 1;
+      newCategories[swapIndex].order = swapIndex + 1;
+      
+      setCategories(newCategories);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -125,17 +141,17 @@ export function CategoryManagement() {
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle>Categories ({categories.length})</CardTitle>
-          <p className="text-sm text-gray-600">Drag to reorder categories</p>
+          <p className="text-sm text-gray-600">Use the arrow buttons to reorder categories</p>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {categories.map((category) => (
+            {categories.map((category, index) => (
               <div
                 key={category.id}
                 className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center space-x-4">
-                  <GripVertical className="h-5 w-5 text-gray-400 cursor-move" />
+                  <GripVertical className="h-5 w-5 text-gray-400" />
                   <div className="flex items-center space-x-3">
                     {editingCategory === category.id ? (
                       <div className="flex items-center space-x-2">
@@ -178,6 +194,22 @@ export function CategoryManagement() {
                     <Button 
                       variant="ghost" 
                       size="sm"
+                      onClick={() => moveCategory(category.id, 'up')}
+                      disabled={index === 0}
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => moveCategory(category.id, 'down')}
+                      disabled={index === categories.length - 1}
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
                       onClick={() => handleEditCategory(category.id)}
                     >
                       <Edit className="h-4 w-4" />
@@ -194,54 +226,6 @@ export function CategoryManagement() {
                 )}
               </div>
             ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Category Assignment */}
-      <Card className="border-0 shadow-sm">
-        <CardHeader>
-          <CardTitle>Product Assignment</CardTitle>
-          <p className="text-sm text-gray-600">Assign products to categories</p>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-medium mb-3 flex items-center justify-between">
-                Unassigned Products
-                <Badge variant="secondary">{unassignedProducts.length}</Badge>
-              </h3>
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                {unassignedProducts.map((product, index) => (
-                  <div key={index} className="p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-medium">{product.name}</span>
-                        <p className="text-sm text-gray-500">{product.description}</p>
-                      </div>
-                      <Button size="sm" variant="outline">
-                        Assign
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="font-medium mb-3">Quick Actions</h3>
-              <div className="space-y-3">
-                <Button className="w-full justify-start" variant="outline">
-                  Bulk Assign Categories
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  Import Categories from CSV
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  Export Category Report
-                </Button>
-              </div>
-            </div>
           </div>
         </CardContent>
       </Card>
