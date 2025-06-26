@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { DollarSign, TrendingUp, Clock, Download, RefreshCw, Eye, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -122,6 +121,7 @@ export function PayoutsTransactions() {
     refundFee: true
   });
   const [showPayoutModal, setShowPayoutModal] = useState(false);
+  const [payoutAmount, setPayoutAmount] = useState(0);
   const [viewingTransaction, setViewingTransaction] = useState<string | null>(null);
 
   const totalEarnings = transactions.reduce((sum, t) => sum + t.merchantEarnings, 0);
@@ -158,10 +158,15 @@ export function PayoutsTransactions() {
   };
 
   const handleRequestPayout = () => {
+    setPayoutAmount(availableBalance);
+    setShowPayoutModal(true);
+  };
+
+  const confirmPayout = () => {
     const newPayout: Payout = {
       id: `PO-${String(payouts.length + 1).padStart(3, '0')}`,
       date: new Date().toISOString().split('T')[0],
-      amount: availableBalance,
+      amount: payoutAmount,
       transactions: completedTransactions,
       status: 'processing',
       method: 'Bank Transfer',
@@ -170,6 +175,7 @@ export function PayoutsTransactions() {
     
     setPayouts(prev => [newPayout, ...prev]);
     setShowPayoutModal(false);
+    setPayoutAmount(0);
   };
 
   const handleViewTransaction = (transactionId: string) => {
@@ -222,7 +228,7 @@ export function PayoutsTransactions() {
             <Download className="h-4 w-4 mr-2" />
             Export Report
           </Button>
-          <Button onClick={() => setShowPayoutModal(true)}>
+          <Button onClick={handleRequestPayout}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Request Payout
           </Button>
@@ -562,6 +568,25 @@ export function PayoutsTransactions() {
                     </div>
                   </div>
                 </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Payout Amount *
+                  </label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max={availableBalance}
+                    value={payoutAmount}
+                    onChange={(e) => setPayoutAmount(parseFloat(e.target.value) || 0)}
+                    placeholder="Enter amount to withdraw"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Maximum: ${availableBalance.toFixed(2)}
+                  </p>
+                </div>
+                
                 <p className="text-sm text-gray-600">
                   This payout will be processed via bank transfer to your registered account.
                 </p>
@@ -570,7 +595,10 @@ export function PayoutsTransactions() {
                 <Button variant="outline" onClick={() => setShowPayoutModal(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleRequestPayout}>
+                <Button 
+                  onClick={confirmPayout}
+                  disabled={payoutAmount <= 0 || payoutAmount > availableBalance}
+                >
                   Confirm Payout Request
                 </Button>
               </div>

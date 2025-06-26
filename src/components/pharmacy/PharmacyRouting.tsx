@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Plus, Edit, Trash2, MapPin, Phone, Building, Save, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +27,7 @@ interface Pharmacy {
     zipCode: string;
   };
   status: 'active' | 'inactive';
+  isDefault: boolean;
 }
 
 export function PharmacyRouting() {
@@ -45,7 +45,8 @@ export function PharmacyRouting() {
         city: 'Los Angeles',
         zipCode: '90210'
       },
-      status: 'active'
+      status: 'active',
+      isDefault: true
     },
     {
       id: 2,
@@ -60,7 +61,8 @@ export function PharmacyRouting() {
         city: 'Dallas',
         zipCode: '75201'
       },
-      status: 'active'
+      status: 'active',
+      isDefault: false
     }
   ]);
 
@@ -75,7 +77,8 @@ export function PharmacyRouting() {
     email: '',
     address: '',
     city: '',
-    zipCode: ''
+    zipCode: '',
+    isDefault: false
   });
 
   const states = [
@@ -97,7 +100,8 @@ export function PharmacyRouting() {
       email: '',
       address: '',
       city: '',
-      zipCode: ''
+      zipCode: '',
+      isDefault: false
     });
   };
 
@@ -112,31 +116,44 @@ export function PharmacyRouting() {
       email: pharmacy.contact.email,
       address: pharmacy.contact.address,
       city: pharmacy.contact.city,
-      zipCode: pharmacy.contact.zipCode
+      zipCode: pharmacy.contact.zipCode,
+      isDefault: pharmacy.isDefault
     });
   };
 
   const handleSavePharmacy = () => {
     if (editingId) {
       // Update existing pharmacy
-      setPharmacies(prev => prev.map(pharmacy => 
-        pharmacy.id === editingId 
-          ? {
-              ...pharmacy,
-              name: formData.name,
-              npi: formData.npi,
-              stateLicense: formData.stateLicense,
-              state: formData.state,
-              contact: {
-                phone: formData.phone,
-                email: formData.email,
-                address: formData.address,
-                city: formData.city,
-                zipCode: formData.zipCode
-              }
-            }
-          : pharmacy
-      ));
+      setPharmacies(prev => prev.map(pharmacy => {
+        if (pharmacy.id === editingId) {
+          // If setting as default, unset other defaults in the same state
+          if (formData.isDefault && formData.state) {
+            setPharmacies(prevPharmacies => 
+              prevPharmacies.map(p => 
+                p.state === formData.state && p.id !== editingId
+                  ? { ...p, isDefault: false }
+                  : p
+              )
+            );
+          }
+          return {
+            ...pharmacy,
+            name: formData.name,
+            npi: formData.npi,
+            stateLicense: formData.stateLicense,
+            state: formData.state,
+            contact: {
+              phone: formData.phone,
+              email: formData.email,
+              address: formData.address,
+              city: formData.city,
+              zipCode: formData.zipCode
+            },
+            isDefault: formData.isDefault
+          };
+        }
+        return pharmacy;
+      }));
       setEditingId(null);
     } else {
       // Add new pharmacy
@@ -153,8 +170,21 @@ export function PharmacyRouting() {
           city: formData.city,
           zipCode: formData.zipCode
         },
-        status: 'active'
+        status: 'active',
+        isDefault: formData.isDefault
       };
+
+      // If setting as default, unset other defaults in the same state
+      if (formData.isDefault && formData.state) {
+        setPharmacies(prev => 
+          prev.map(p => 
+            p.state === formData.state 
+              ? { ...p, isDefault: false }
+              : p
+          )
+        );
+      }
+
       setPharmacies(prev => [...prev, newPharmacy]);
       setShowAddForm(false);
     }
@@ -169,7 +199,8 @@ export function PharmacyRouting() {
       email: '',
       address: '',
       city: '',
-      zipCode: ''
+      zipCode: '',
+      isDefault: false
     });
   };
 
@@ -185,7 +216,8 @@ export function PharmacyRouting() {
       email: '',
       address: '',
       city: '',
-      zipCode: ''
+      zipCode: '',
+      isDefault: false
     });
   };
 
@@ -250,6 +282,18 @@ export function PharmacyRouting() {
                   <option key={state} value={state}>{state}</option>
                 ))}
               </select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isDefault"
+                checked={formData.isDefault}
+                onChange={(e) => setFormData(prev => ({ ...prev, isDefault: e.target.checked }))}
+                className="rounded"
+              />
+              <label htmlFor="isDefault" className="text-sm text-gray-700">
+                Set as default pharmacy for this state
+              </label>
             </div>
           </div>
           
@@ -372,7 +416,14 @@ export function PharmacyRouting() {
                   <TableRow key={pharmacy.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{pharmacy.name}</div>
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium">{pharmacy.name}</span>
+                          {pharmacy.isDefault && (
+                            <Badge className="bg-blue-100 text-blue-800 text-xs">
+                              Default
+                            </Badge>
+                          )}
+                        </div>
                         <div className="text-sm text-gray-500">{pharmacy.contact.address}, {pharmacy.contact.city}</div>
                       </div>
                     </TableCell>
