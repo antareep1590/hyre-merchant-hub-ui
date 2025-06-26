@@ -8,8 +8,6 @@ import {
   Users,
   Building2,
   DollarSign,
-  Menu,
-  ChevronLeft
 } from 'lucide-react';
 import {
   Sidebar,
@@ -20,7 +18,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
   SidebarHeader
 } from '@/components/ui/sidebar';
 import { NavigationItem } from './DashboardLayout';
@@ -29,6 +26,7 @@ import { cn } from '@/lib/utils';
 interface AppSidebarProps {
   activeItem: NavigationItem;
   onItemClick: (item: NavigationItem) => void;
+  merchantName: string;
 }
 
 const menuItems = [
@@ -59,7 +57,7 @@ const menuItems = [
   },
   {
     id: 'subscribers' as NavigationItem,
-    title: 'Subscribers',
+    title: 'Patients',
     icon: Users,
   },
   {
@@ -74,17 +72,19 @@ const menuItems = [
   },
 ];
 
-export function AppSidebar({ activeItem, onItemClick }: AppSidebarProps) {
+export function AppSidebar({ activeItem, onItemClick, merchantName }: AppSidebarProps) {
   return (
     <Sidebar className="border-r border-gray-200 bg-white">
       <SidebarHeader className="border-b border-gray-200 p-6">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">H</span>
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-white font-bold text-lg">
+              {merchantName.charAt(0)}
+            </span>
           </div>
           <div>
-            <h1 className="font-semibold text-gray-900">Hyre Health</h1>
-            <p className="text-xs text-gray-500">Merchant Portal</p>
+            <h1 className="font-bold text-gray-900 text-lg">{merchantName}</h1>
+            <p className="text-xs text-gray-500">Health Portal</p>
           </div>
         </div>
       </SidebarHeader>
@@ -101,9 +101,9 @@ export function AppSidebar({ activeItem, onItemClick }: AppSidebarProps) {
                   <SidebarMenuButton
                     onClick={() => onItemClick(item.id)}
                     className={cn(
-                      "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                      "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:translate-x-1",
                       activeItem === item.id
-                        ? "bg-primary/10 text-primary border border-primary/20"
+                        ? "bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 border border-blue-200 shadow-sm"
                         : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                     )}
                   >

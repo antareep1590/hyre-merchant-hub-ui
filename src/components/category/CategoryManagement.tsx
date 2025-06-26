@@ -1,13 +1,21 @@
 
 import { useState } from 'react';
-import { Plus, Edit, Trash2, GripVertical } from 'lucide-react';
+import { Plus, Edit, Trash2, GripVertical, Check, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 
+interface Category {
+  id: number;
+  name: string;
+  productCount: number;
+  order: number;
+  color: string;
+}
+
 export function CategoryManagement() {
-  const [categories, setCategories] = useState([
+  const [categories, setCategories] = useState<Category[]>([
     { id: 1, name: 'Weight Loss', productCount: 5, order: 1, color: 'bg-blue-100 text-blue-800' },
     { id: 2, name: 'Hormone Therapy', productCount: 8, order: 2, color: 'bg-green-100 text-green-800' },
     { id: 3, name: 'Skincare', productCount: 3, order: 3, color: 'bg-purple-100 text-purple-800' },
@@ -15,13 +23,15 @@ export function CategoryManagement() {
     { id: 5, name: 'Wellness', productCount: 6, order: 5, color: 'bg-pink-100 text-pink-800' }
   ]);
 
+  const [editingCategory, setEditingCategory] = useState<number | null>(null);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [editingName, setEditingName] = useState('');
 
   const handleAddCategory = () => {
     if (newCategoryName.trim()) {
-      const newCategory = {
-        id: categories.length + 1,
+      const newCategory: Category = {
+        id: Math.max(...categories.map(c => c.id)) + 1,
         name: newCategoryName,
         productCount: 0,
         order: categories.length + 1,
@@ -33,9 +43,30 @@ export function CategoryManagement() {
     }
   };
 
+  const handleEditCategory = (categoryId: number) => {
+    const category = categories.find(c => c.id === categoryId);
+    if (category) {
+      setEditingCategory(categoryId);
+      setEditingName(category.name);
+    }
+  };
+
+  const handleSaveCategory = (categoryId: number) => {
+    setCategories(categories.map(c => 
+      c.id === categoryId ? { ...c, name: editingName } : c
+    ));
+    setEditingCategory(null);
+    setEditingName('');
+  };
+
   const handleDeleteCategory = (id: number) => {
     setCategories(categories.filter(cat => cat.id !== id));
   };
+
+  const unassignedProducts = [
+    { name: 'New Skincare Product', description: 'Recently added product' },
+    { name: 'Custom Peptide Mix', description: 'Specialized formulation' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -47,7 +78,7 @@ export function CategoryManagement() {
         </div>
         <Button 
           onClick={() => setIsAdding(true)}
-          className="flex items-center space-x-2"
+          className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700"
         >
           <Plus className="h-4 w-4" />
           <span>Add Category</span>
@@ -56,7 +87,10 @@ export function CategoryManagement() {
 
       {/* Add New Category */}
       {isAdding && (
-        <Card className="border-0 shadow-sm">
+        <Card className="border-2 border-blue-200 shadow-lg animate-fade-in">
+          <CardHeader className="bg-blue-50">
+            <CardTitle>Add New Category</CardTitle>
+          </CardHeader>
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row gap-4">
               <Input
@@ -67,7 +101,10 @@ export function CategoryManagement() {
                 className="flex-1"
               />
               <div className="flex gap-2">
-                <Button onClick={handleAddCategory}>Save</Button>
+                <Button onClick={handleAddCategory} className="bg-blue-600 hover:bg-blue-700">
+                  <Check className="h-4 w-4 mr-2" />
+                  Save
+                </Button>
                 <Button 
                   variant="outline" 
                   onClick={() => {
@@ -75,6 +112,7 @@ export function CategoryManagement() {
                     setNewCategoryName('');
                   }}
                 >
+                  <X className="h-4 w-4 mr-2" />
                   Cancel
                 </Button>
               </div>
@@ -99,28 +137,61 @@ export function CategoryManagement() {
                 <div className="flex items-center space-x-4">
                   <GripVertical className="h-5 w-5 text-gray-400 cursor-move" />
                   <div className="flex items-center space-x-3">
-                    <Badge className={category.color}>
-                      {category.name}
-                    </Badge>
-                    <span className="text-sm text-gray-500">
-                      {category.productCount} products
-                    </span>
+                    {editingCategory === category.id ? (
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSaveCategory(category.id)}
+                          className="w-48"
+                        />
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleSaveCategory(category.id)}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => setEditingCategory(null)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <Badge className={category.color}>
+                          {category.name}
+                        </Badge>
+                        <span className="text-sm text-gray-500">
+                          {category.productCount} products
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-2">
-                  <Button variant="ghost" size="sm">
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteCategory(category.id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                {editingCategory !== category.id && (
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleEditCategory(category.id)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteCategory(category.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -136,16 +207,24 @@ export function CategoryManagement() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h3 className="font-medium mb-3">Unassigned Products</h3>
+              <h3 className="font-medium mb-3 flex items-center justify-between">
+                Unassigned Products
+                <Badge variant="secondary">{unassignedProducts.length}</Badge>
+              </h3>
               <div className="space-y-2 max-h-64 overflow-y-auto">
-                <div className="p-3 border rounded-lg">
-                  <span className="font-medium">New Skincare Product</span>
-                  <p className="text-sm text-gray-500">No category assigned</p>
-                </div>
-                <div className="p-3 border rounded-lg">
-                  <span className="font-medium">Custom Peptide Mix</span>
-                  <p className="text-sm text-gray-500">No category assigned</p>
-                </div>
+                {unassignedProducts.map((product, index) => (
+                  <div key={index} className="p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-medium">{product.name}</span>
+                        <p className="text-sm text-gray-500">{product.description}</p>
+                      </div>
+                      <Button size="sm" variant="outline">
+                        Assign
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
             

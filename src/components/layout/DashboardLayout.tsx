@@ -24,11 +24,12 @@ export type NavigationItem =
 
 const DashboardLayout = () => {
   const [activeItem, setActiveItem] = useState<NavigationItem>('dashboard');
+  const [merchantName] = useState('Elite Wellness Clinic'); // This would come from merchant settings
 
   const renderContent = () => {
     switch (activeItem) {
       case 'dashboard':
-        return <DashboardHome />;
+        return <DashboardHome onNavigate={setActiveItem} />;
       case 'products':
         return <ProductManagement />;
       case 'categories':
@@ -44,16 +45,20 @@ const DashboardLayout = () => {
       case 'payouts':
         return <PayoutsTransactions />;
       default:
-        return <DashboardHome />;
+        return <DashboardHome onNavigate={setActiveItem} />;
     }
   };
 
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50/50 font-inter">
-        <AppSidebar activeItem={activeItem} onItemClick={setActiveItem} />
+        <AppSidebar 
+          activeItem={activeItem} 
+          onItemClick={setActiveItem}
+          merchantName={merchantName}
+        />
         <div className="flex-1 flex flex-col">
-          <TopNavigation />
+          <TopNavigation merchantName={merchantName} />
           <main className="flex-1 p-4 md:p-6 lg:p-8">
             <div className="animate-fade-in">
               {renderContent()}
