@@ -1,14 +1,17 @@
 
 import { useState } from 'react';
-import { Plus, Edit, Trash2, GripVertical, Check, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Edit, Trash2, GripVertical, Check, X, ArrowUp, ArrowDown, Image } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 
 interface Category {
   id: number;
   name: string;
+  description?: string;
+  photo?: string;
   productCount: number;
   order: number;
   color: string;
@@ -16,15 +19,17 @@ interface Category {
 
 export function CategoryManagement() {
   const [categories, setCategories] = useState<Category[]>([
-    { id: 1, name: 'Weight Loss', productCount: 5, order: 1, color: 'bg-blue-100 text-blue-800' },
-    { id: 2, name: 'Hormone Therapy', productCount: 8, order: 2, color: 'bg-green-100 text-green-800' },
-    { id: 3, name: 'Skincare', productCount: 3, order: 3, color: 'bg-purple-100 text-purple-800' },
-    { id: 4, name: 'Recovery', productCount: 4, order: 4, color: 'bg-orange-100 text-orange-800' },
-    { id: 5, name: 'Wellness', productCount: 6, order: 5, color: 'bg-pink-100 text-pink-800' }
+    { id: 1, name: 'Weight Loss', description: 'Products to help with weight management and metabolism', productCount: 5, order: 1, color: 'bg-blue-100 text-blue-800' },
+    { id: 2, name: 'Hormone Therapy', description: 'Hormone replacement and balance treatments', productCount: 8, order: 2, color: 'bg-green-100 text-green-800' },
+    { id: 3, name: 'Skincare', description: 'Advanced skincare and anti-aging solutions', productCount: 3, order: 3, color: 'bg-purple-100 text-purple-800' },
+    { id: 4, name: 'Recovery', description: 'Recovery and wellness optimization products', productCount: 4, order: 4, color: 'bg-orange-100 text-orange-800' },
+    { id: 5, name: 'Wellness', description: 'General wellness and preventive care', productCount: 6, order: 5, color: 'bg-pink-100 text-pink-800' }
   ]);
 
   const [editingCategory, setEditingCategory] = useState<number | null>(null);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryDescription, setNewCategoryDescription] = useState('');
+  const [newCategoryPhoto, setNewCategoryPhoto] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [editingName, setEditingName] = useState('');
 
@@ -33,12 +38,16 @@ export function CategoryManagement() {
       const newCategory: Category = {
         id: Math.max(...categories.map(c => c.id)) + 1,
         name: newCategoryName,
+        description: newCategoryDescription.trim() || undefined,
+        photo: newCategoryPhoto.trim() || undefined,
         productCount: 0,
         order: categories.length + 1,
         color: 'bg-gray-100 text-gray-800'
       };
       setCategories([...categories, newCategory]);
       setNewCategoryName('');
+      setNewCategoryDescription('');
+      setNewCategoryPhoto('');
       setIsAdding(false);
     }
   };
@@ -108,24 +117,71 @@ export function CategoryManagement() {
             <CardTitle>Add New Category</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Input
-                placeholder="Category name"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
-                className="flex-1"
-              />
-              <div className="flex gap-2">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category Name *
+                </label>
+                <Input
+                  placeholder="Enter category name"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <Textarea
+                  placeholder="Enter category description"
+                  value={newCategoryDescription}
+                  onChange={(e) => setNewCategoryDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Photo URL
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter photo URL"
+                    value={newCategoryPhoto}
+                    onChange={(e) => setNewCategoryPhoto(e.target.value)}
+                  />
+                  <Button variant="outline" size="sm">
+                    <Image className="h-4 w-4" />
+                  </Button>
+                </div>
+                {newCategoryPhoto && (
+                  <div className="mt-2">
+                    <img 
+                      src={newCategoryPhoto} 
+                      alt="Category preview" 
+                      className="w-20 h-20 object-cover rounded-md border"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder.svg';
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex gap-2 pt-4">
                 <Button onClick={handleAddCategory} className="bg-blue-600 hover:bg-blue-700">
                   <Check className="h-4 w-4 mr-2" />
-                  Save
+                  Save Category
                 </Button>
                 <Button 
                   variant="outline" 
                   onClick={() => {
                     setIsAdding(false);
                     setNewCategoryName('');
+                    setNewCategoryDescription('');
+                    setNewCategoryPhoto('');
                   }}
                 >
                   <X className="h-4 w-4 mr-2" />
@@ -152,7 +208,19 @@ export function CategoryManagement() {
               >
                 <div className="flex items-center space-x-4">
                   <GripVertical className="h-5 w-5 text-gray-400" />
-                  <div className="flex items-center space-x-3">
+                  
+                  {category.photo && (
+                    <img 
+                      src={category.photo} 
+                      alt={category.name}
+                      className="w-12 h-12 object-cover rounded-md border"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder.svg';
+                      }}
+                    />
+                  )}
+                  
+                  <div className="flex flex-col space-y-1">
                     {editingCategory === category.id ? (
                       <div className="flex items-center space-x-2">
                         <Input
@@ -178,12 +246,19 @@ export function CategoryManagement() {
                       </div>
                     ) : (
                       <>
-                        <Badge className={category.color}>
-                          {category.name}
-                        </Badge>
-                        <span className="text-sm text-gray-500">
-                          {category.productCount} products
-                        </span>
+                        <div className="flex items-center space-x-3">
+                          <Badge className={category.color}>
+                            {category.name}
+                          </Badge>
+                          <span className="text-sm text-gray-500">
+                            {category.productCount} products
+                          </span>
+                        </div>
+                        {category.description && (
+                          <p className="text-sm text-gray-600 max-w-md">
+                            {category.description}
+                          </p>
+                        )}
                       </>
                     )}
                   </div>
