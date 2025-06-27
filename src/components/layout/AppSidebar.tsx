@@ -1,4 +1,3 @@
-
 import {
   BarChart3,
   Package,
@@ -8,6 +7,7 @@ import {
   Users,
   Building2,
   DollarSign,
+  Ticket,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -69,6 +69,11 @@ const menuItems = [
     id: 'payouts' as NavigationItem,
     title: 'Payouts',
     icon: DollarSign,
+  },
+  {
+    id: 'coupons' as NavigationItem,
+    title: 'Coupons',
+    icon: Ticket,
   },
 ];
 

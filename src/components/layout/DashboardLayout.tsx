@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
@@ -11,6 +10,7 @@ import { IntakeForms } from '../intake/IntakeForms';
 import { SubscriberManagement } from '../subscriber/SubscriberManagement';
 import { PharmacyRouting } from '../pharmacy/PharmacyRouting';
 import { PayoutsTransactions } from '../payouts/PayoutsTransactions';
+import { CouponManagement } from '../coupon/CouponManagement';
 
 export type NavigationItem = 
   | 'dashboard' 
@@ -20,7 +20,8 @@ export type NavigationItem =
   | 'intake-forms' 
   | 'subscribers' 
   | 'pharmacy' 
-  | 'payouts';
+  | 'payouts'
+  | 'coupons';
 
 const DashboardLayout = () => {
   const [activeItem, setActiveItem] = useState<NavigationItem>('dashboard');
@@ -44,6 +45,8 @@ const DashboardLayout = () => {
         return <PharmacyRouting />;
       case 'payouts':
         return <PayoutsTransactions />;
+      case 'coupons':
+        return <CouponManagement />;
       default:
         return <DashboardHome onNavigate={setActiveItem} />;
     }
