@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Plus, Edit, Trash2, GripVertical, Check, X, ArrowUp, ArrowDown, Image } from 'lucide-react';
+import { Plus, Edit, Trash2, GripVertical, Check, X, ArrowUp, ArrowDown, Upload } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,9 +29,27 @@ export function CategoryManagement() {
   const [editingCategory, setEditingCategory] = useState<number | null>(null);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryDescription, setNewCategoryDescription] = useState('');
-  const [newCategoryPhoto, setNewCategoryPhoto] = useState('');
+  const [newCategoryPhoto, setNewCategoryPhoto] = useState<File | null>(null);
+  const [newCategoryPhotoPreview, setNewCategoryPhotoPreview] = useState<string>('');
   const [isAdding, setIsAdding] = useState(false);
   const [editingName, setEditingName] = useState('');
+
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setNewCategoryPhoto(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setNewCategoryPhotoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearPhoto = () => {
+    setNewCategoryPhoto(null);
+    setNewCategoryPhotoPreview('');
+  };
 
   const handleAddCategory = () => {
     if (newCategoryName.trim()) {
@@ -39,7 +57,7 @@ export function CategoryManagement() {
         id: Math.max(...categories.map(c => c.id)) + 1,
         name: newCategoryName,
         description: newCategoryDescription.trim() || undefined,
-        photo: newCategoryPhoto.trim() || undefined,
+        photo: newCategoryPhotoPreview || undefined,
         productCount: 0,
         order: categories.length + 1,
         color: 'bg-gray-100 text-gray-800'
@@ -47,7 +65,8 @@ export function CategoryManagement() {
       setCategories([...categories, newCategory]);
       setNewCategoryName('');
       setNewCategoryDescription('');
-      setNewCategoryPhoto('');
+      setNewCategoryPhoto(null);
+      setNewCategoryPhotoPreview('');
       setIsAdding(false);
     }
   };
@@ -144,30 +163,37 @@ export function CategoryManagement() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Photo URL
+                  Category Photo
                 </label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Enter photo URL"
-                    value={newCategoryPhoto}
-                    onChange={(e) => setNewCategoryPhoto(e.target.value)}
-                  />
-                  <Button variant="outline" size="sm">
-                    <Image className="h-4 w-4" />
-                  </Button>
-                </div>
-                {newCategoryPhoto && (
-                  <div className="mt-2">
-                    <img 
-                      src={newCategoryPhoto} 
-                      alt="Category preview" 
-                      className="w-20 h-20 object-cover rounded-md border"
-                      onError={(e) => {
-                        e.currentTarget.src = '/placeholder.svg';
-                      }}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={clearPhoto}
+                      disabled={!newCategoryPhoto}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
-                )}
+                  
+                  {newCategoryPhotoPreview && (
+                    <div className="mt-2">
+                      <img 
+                        src={newCategoryPhotoPreview} 
+                        alt="Category preview" 
+                        className="w-20 h-20 object-cover rounded-md border"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="flex gap-2 pt-4">
@@ -181,7 +207,8 @@ export function CategoryManagement() {
                     setIsAdding(false);
                     setNewCategoryName('');
                     setNewCategoryDescription('');
-                    setNewCategoryPhoto('');
+                    setNewCategoryPhoto(null);
+                    setNewCategoryPhotoPreview('');
                   }}
                 >
                   <X className="h-4 w-4 mr-2" />
