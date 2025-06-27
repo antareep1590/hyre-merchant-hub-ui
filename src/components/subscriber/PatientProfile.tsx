@@ -55,13 +55,13 @@ export function PatientProfile({ patient, onClose }: PatientProfileProps) {
         
         <div className="p-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Patient Details */}
+            {/* Consumer Details */}
             <div className="lg:col-span-1">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <User className="h-5 w-5" />
-                    <span>Patient Information</span>
+                    <span>Consumer Information</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">

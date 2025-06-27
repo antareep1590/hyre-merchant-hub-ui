@@ -1,3 +1,4 @@
+
 import {
   BarChart3,
   Package,
@@ -57,7 +58,7 @@ const menuItems = [
   },
   {
     id: 'subscribers' as NavigationItem,
-    title: 'Patients',
+    title: 'Consumers',
     icon: Users,
   },
   {

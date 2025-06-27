@@ -119,7 +119,7 @@ export function SubscriberManagement() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'subscribers.csv';
+    a.download = 'consumers.csv';
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -129,8 +129,8 @@ export function SubscriberManagement() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Patient Management</h1>
-          <p className="text-gray-600">Manage your patients and subscribers</p>
+          <h1 className="text-2xl font-bold text-gray-900">Consumer Management</h1>
+          <p className="text-gray-600">Manage your consumers and subscribers</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleExportCSV}>
@@ -180,7 +180,7 @@ export function SubscriberManagement() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 type="search"
-                placeholder="Search subscribers..."
+                placeholder="Search consumers..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -205,7 +205,7 @@ export function SubscriberManagement() {
       {/* Subscribers Table */}
       <Card className="border-0 shadow-sm">
         <CardHeader>
-          <CardTitle>Patients ({filteredSubscribers.length})</CardTitle>
+          <CardTitle>Consumers ({filteredSubscribers.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -261,7 +261,7 @@ export function SubscriberManagement() {
         </CardContent>
       </Card>
 
-      {/* Patient Profile Modal */}
+      {/* Consumer Profile Modal */}
       {viewingPatient && (
         <PatientProfile 
           patient={viewingPatient} 
