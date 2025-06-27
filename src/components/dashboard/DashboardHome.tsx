@@ -1,4 +1,3 @@
-
 import { Plus, Edit, Eye, TrendingUp, Users, Package, Calendar, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ interface DashboardHomeProps {
 export function DashboardHome({ onNavigate }: DashboardHomeProps) {
   const stats = [
     {
-      title: 'Total Patients',
+      title: 'Total Consumers',
       value: '1,247',
       change: '+12% this month',
       icon: Users,
