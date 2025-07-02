@@ -19,9 +19,10 @@ interface Product {
   lastUpdated: string;
   description?: string;
   sku?: string;
-  dosageOptions?: { name: string; price: string; isDefault: boolean }[];
+  dosageOptions?: { name: string; price: string; isDefault: boolean; dosage: string; }[];
   images?: string[];
   benefits?: string[];
+  sideEffects?: string[];
   keyFeatures?: string[];
   purpose?: string;
   activeIngredients?: { name: string; dosage: string }[];
@@ -36,6 +37,8 @@ interface Product {
   shippingInfo?: string;
   returnPolicy?: string;
   freeShippingThreshold?: number;
+  pricingTable?: { tier: string; price: string; savings: string; mostPopular?: boolean }[];
+  relatedProducts?: { id: number; name: string; price: string; image?: string }[];
 }
 
 interface ProductDetailProps {
@@ -45,31 +48,44 @@ interface ProductDetailProps {
 
 interface OverrideState {
   description: boolean;
+  benefits: boolean;
+  sideEffects: boolean;
   ingredients: boolean;
   usage: boolean;
   faqs: boolean;
   shipping: boolean;
+  pricing: boolean;
+  dosageOptions: boolean;
 }
 
 export function ProductDetail({ product, onClose }: ProductDetailProps) {
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [overrides, setOverrides] = useState<OverrideState>({
     description: false,
+    benefits: false,
+    sideEffects: false,
     ingredients: false,
     usage: false,
     faqs: false,
-    shipping: false
+    shipping: false,
+    pricing: false,
+    dosageOptions: false
   });
 
   // Local state for editable fields
   const [editableProduct, setEditableProduct] = useState(product);
   const [expandedSections, setExpandedSections] = useState({
     description: true,
+    benefits: true,
+    sideEffects: true,
     ingredients: true,
     usage: true,
     faqs: true,
     reviews: true,
-    shipping: true
+    shipping: true,
+    pricing: true,
+    dosageOptions: true,
+    relatedProducts: true
   });
 
   const handleEdit = (section: string) => {
@@ -244,7 +260,121 @@ export function ProductDetail({ product, onClose }: ProductDetailProps) {
               </Collapsible>
             </Card>
 
-            {/* 2. Ingredients / Composition */}
+            {/* 2. Benefits */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <CardTitle 
+                  className="flex items-center cursor-pointer"
+                  onClick={() => toggleSection('benefits')}
+                >
+                  Benefits
+                  {expandedSections.benefits ? 
+                    <ChevronUp className="h-4 w-4 ml-2" /> : 
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  }
+                </CardTitle>
+                <div className="flex items-center space-x-2">
+                  {overrides.benefits && <Badge variant="destructive">Modified</Badge>}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => editingSection === 'benefits' ? handleSave('benefits') : handleEdit('benefits')}
+                  >
+                    {editingSection === 'benefits' ? 'Save' : <Edit2 className="h-4 w-4" />}
+                  </Button>
+                  {overrides.benefits && (
+                    <Button variant="ghost" size="sm" onClick={() => handleReset('benefits')}>
+                      <RotateCcw className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <Collapsible open={expandedSections.benefits}>
+                <CollapsibleContent>
+                  <CardContent className="space-y-4">
+                    {editingSection === 'benefits' ? (
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Benefits (one per line)</label>
+                        <Textarea
+                          value={editableProduct.benefits?.join('\n') || ''}
+                          onChange={(e) => setEditableProduct(prev => ({ ...prev, benefits: e.target.value.split('\n').filter(b => b.trim()) }))}
+                          placeholder="List key benefits here..."
+                          rows={6}
+                          className="mt-1"
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <ul className="list-disc list-inside text-gray-700 space-y-2">
+                          {editableProduct.benefits?.map((benefit, index) => (
+                            <li key={index}>{benefit}</li>
+                          )) || <li className="text-gray-500">No benefits listed</li>}
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </CollapsibleContent>
+              </Collapsible>
+            </Card>
+
+            {/* 3. Side Effects */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <CardTitle 
+                  className="flex items-center cursor-pointer"
+                  onClick={() => toggleSection('sideEffects')}
+                >
+                  Side Effects
+                  {expandedSections.sideEffects ? 
+                    <ChevronUp className="h-4 w-4 ml-2" /> : 
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  }
+                </CardTitle>
+                <div className="flex items-center space-x-2">
+                  {overrides.sideEffects && <Badge variant="destructive">Modified</Badge>}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => editingSection === 'sideEffects' ? handleSave('sideEffects') : handleEdit('sideEffects')}
+                  >
+                    {editingSection === 'sideEffects' ? 'Save' : <Edit2 className="h-4 w-4" />}
+                  </Button>
+                  {overrides.sideEffects && (
+                    <Button variant="ghost" size="sm" onClick={() => handleReset('sideEffects')}>
+                      <RotateCcw className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <Collapsible open={expandedSections.sideEffects}>
+                <CollapsibleContent>
+                  <CardContent className="space-y-4">
+                    {editingSection === 'sideEffects' ? (
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Side Effects (one per line)</label>
+                        <Textarea
+                          value={editableProduct.sideEffects?.join('\n') || ''}
+                          onChange={(e) => setEditableProduct(prev => ({ ...prev, sideEffects: e.target.value.split('\n').filter(s => s.trim()) }))}
+                          placeholder="List potential side effects here..."
+                          rows={4}
+                          className="mt-1"
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <ul className="list-disc list-inside text-gray-700 space-y-1">
+                          {editableProduct.sideEffects?.map((effect, index) => (
+                            <li key={index}>{effect}</li>
+                          )) || <li className="text-gray-500">No side effects listed</li>}
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </CollapsibleContent>
+              </Collapsible>
+            </Card>
+
+            {/* 4. Ingredients / Composition */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                 <CardTitle 
@@ -590,6 +720,162 @@ export function ProductDetail({ product, onClose }: ProductDetailProps) {
                         </div>
                       </>
                     )}
+                  </CardContent>
+                </CollapsibleContent>
+              </Collapsible>
+            </Card>
+
+            {/* 7. Pricing Table */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <CardTitle 
+                  className="flex items-center cursor-pointer"
+                  onClick={() => toggleSection('pricing')}
+                >
+                  Pricing Options
+                  {expandedSections.pricing ? 
+                    <ChevronUp className="h-4 w-4 ml-2" /> : 
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  }
+                </CardTitle>
+                <div className="flex items-center space-x-2">
+                  {overrides.pricing && <Badge variant="destructive">Modified</Badge>}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => editingSection === 'pricing' ? handleSave('pricing') : handleEdit('pricing')}
+                  >
+                    {editingSection === 'pricing' ? 'Save' : <Edit2 className="h-4 w-4" />}
+                  </Button>
+                  {overrides.pricing && (
+                    <Button variant="ghost" size="sm" onClick={() => handleReset('pricing')}>
+                      <RotateCcw className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <Collapsible open={expandedSections.pricing}>
+                <CollapsibleContent>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {editableProduct.pricingTable?.map((tier, index) => (
+                        <div 
+                          key={index} 
+                          className={`border rounded-lg p-4 ${tier.mostPopular ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                        >
+                          {tier.mostPopular && (
+                            <Badge className="mb-2 bg-blue-500">Most Popular</Badge>
+                          )}
+                          <h4 className="font-semibold text-lg">{tier.tier}</h4>
+                          <p className="text-2xl font-bold text-green-600">{tier.price}</p>
+                          <p className="text-sm text-gray-600">{tier.savings}</p>
+                        </div>
+                      )) || (
+                        <p className="text-gray-500 col-span-3 text-center py-8">No pricing tiers available</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Collapsible>
+            </Card>
+
+            {/* 8. Dosage Options */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <CardTitle 
+                  className="flex items-center cursor-pointer"
+                  onClick={() => toggleSection('dosageOptions')}
+                >
+                  Dosage Options
+                  {expandedSections.dosageOptions ? 
+                    <ChevronUp className="h-4 w-4 ml-2" /> : 
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  }
+                </CardTitle>
+                <div className="flex items-center space-x-2">
+                  {overrides.dosageOptions && <Badge variant="destructive">Modified</Badge>}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => editingSection === 'dosageOptions' ? handleSave('dosageOptions') : handleEdit('dosageOptions')}
+                  >
+                    {editingSection === 'dosageOptions' ? 'Save' : <Edit2 className="h-4 w-4" />}
+                  </Button>
+                  {overrides.dosageOptions && (
+                    <Button variant="ghost" size="sm" onClick={() => handleReset('dosageOptions')}>
+                      <RotateCcw className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <Collapsible open={expandedSections.dosageOptions}>
+                <CollapsibleContent>
+                  <CardContent>
+                    <div className="border rounded-lg overflow-hidden">
+                      <table className="w-full">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Option</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Dosage</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Price</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Default</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {editableProduct.dosageOptions?.map((option, index) => (
+                            <tr key={index} className="border-t">
+                              <td className="px-4 py-2 text-sm text-gray-900">{option.name}</td>
+                              <td className="px-4 py-2 text-sm text-gray-700">{option.dosage}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900 font-medium">{option.price}</td>
+                              <td className="px-4 py-2">
+                                {option.isDefault && <Badge variant="default" className="text-xs">Default</Badge>}
+                              </td>
+                            </tr>
+                          )) || (
+                            <tr>
+                              <td colSpan={4} className="px-4 py-2 text-sm text-gray-500 text-center">
+                                No dosage options available
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Collapsible>
+            </Card>
+
+            {/* 9. Related Products */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <CardTitle 
+                  className="flex items-center cursor-pointer"
+                  onClick={() => toggleSection('relatedProducts')}
+                >
+                  Related Products
+                  {expandedSections.relatedProducts ? 
+                    <ChevronUp className="h-4 w-4 ml-2" /> : 
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  }
+                </CardTitle>
+              </CardHeader>
+              <Collapsible open={expandedSections.relatedProducts}>
+                <CollapsibleContent>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {editableProduct.relatedProducts?.map((product, index) => (
+                        <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                          <div className="aspect-square bg-gray-100 rounded mb-3 flex items-center justify-center">
+                            <TestTube className="h-8 w-8 text-gray-400" />
+                          </div>
+                          <h5 className="font-medium text-sm text-gray-900 mb-1">{product.name}</h5>
+                          <p className="text-green-600 font-semibold text-sm">{product.price}</p>
+                        </div>
+                      )) || (
+                        <p className="text-gray-500 col-span-3 text-center py-8">No related products available</p>
+                      )}
+                    </div>
                   </CardContent>
                 </CollapsibleContent>
               </Collapsible>
