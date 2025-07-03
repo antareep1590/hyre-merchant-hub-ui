@@ -1,11 +1,12 @@
 
 import { useState } from 'react';
-import { Plus, Edit, Trash2, GripVertical, Check, X, ArrowUp, ArrowDown, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, GripVertical, Check, X, ArrowUp, ArrowDown, Upload, Star } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Category {
   id: number;
@@ -15,6 +16,7 @@ interface Category {
   productCount: number;
   order: number;
   color: string;
+  isPopular?: boolean;
 }
 
 export function CategoryManagement() {
@@ -31,6 +33,7 @@ export function CategoryManagement() {
   const [newCategoryDescription, setNewCategoryDescription] = useState('');
   const [newCategoryPhoto, setNewCategoryPhoto] = useState<File | null>(null);
   const [newCategoryPhotoPreview, setNewCategoryPhotoPreview] = useState<string>('');
+  const [newCategoryIsPopular, setNewCategoryIsPopular] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [editingName, setEditingName] = useState('');
 
@@ -60,13 +63,15 @@ export function CategoryManagement() {
         photo: newCategoryPhotoPreview || undefined,
         productCount: 0,
         order: categories.length + 1,
-        color: 'bg-gray-100 text-gray-800'
+        color: 'bg-gray-100 text-gray-800',
+        isPopular: newCategoryIsPopular
       };
       setCategories([...categories, newCategory]);
       setNewCategoryName('');
       setNewCategoryDescription('');
       setNewCategoryPhoto(null);
       setNewCategoryPhotoPreview('');
+      setNewCategoryIsPopular(false);
       setIsAdding(false);
     }
   };
@@ -196,6 +201,17 @@ export function CategoryManagement() {
                 </div>
               </div>
               
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="isPopular"
+                  checked={newCategoryIsPopular}
+                  onCheckedChange={(checked) => setNewCategoryIsPopular(checked as boolean)}
+                />
+                <label htmlFor="isPopular" className="text-sm font-medium text-gray-700">
+                  Mark as Popular Category
+                </label>
+              </div>
+              
               <div className="flex gap-2 pt-4">
                 <Button onClick={handleAddCategory} className="bg-blue-600 hover:bg-blue-700">
                   <Check className="h-4 w-4 mr-2" />
@@ -209,6 +225,7 @@ export function CategoryManagement() {
                     setNewCategoryDescription('');
                     setNewCategoryPhoto(null);
                     setNewCategoryPhotoPreview('');
+                    setNewCategoryIsPopular(false);
                   }}
                 >
                   <X className="h-4 w-4 mr-2" />
@@ -273,14 +290,19 @@ export function CategoryManagement() {
                       </div>
                     ) : (
                       <>
-                        <div className="flex items-center space-x-3">
-                          <Badge className={category.color}>
-                            {category.name}
-                          </Badge>
-                          <span className="text-sm text-gray-500">
-                            {category.productCount} products
-                          </span>
-                        </div>
+                         <div className="flex items-center space-x-3">
+                           <div className="flex items-center space-x-2">
+                             <Badge className={category.color}>
+                               {category.name}
+                             </Badge>
+                             {category.isPopular && (
+                               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                             )}
+                           </div>
+                           <span className="text-sm text-gray-500">
+                             {category.productCount} products
+                           </span>
+                         </div>
                         {category.description && (
                           <p className="text-sm text-gray-600 max-w-md">
                             {category.description}
