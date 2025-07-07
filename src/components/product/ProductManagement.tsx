@@ -315,6 +315,7 @@ interface ProductDetailPageProps {
 function ProductDetailPage({ product, isEditing, onBack, onEdit, onSave, onReset, onCancel }: ProductDetailPageProps) {
   const [formData, setFormData] = useState({
     name: product.name,
+    category: product.category,
     description: product.description || '',
     benefits: product.benefits || [],
     sideEffects: product.sideEffects || [],
@@ -461,6 +462,25 @@ function ProductDetailPage({ product, isEditing, onBack, onEdit, onSave, onReset
                   />
                 ) : (
                   <p className="text-gray-900">{product.name}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                {isEditing ? (
+                  <select 
+                    value={formData.category}
+                    onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="Weight Loss">Weight Loss</option>
+                    <option value="Hormone Therapy">Hormone Therapy</option>
+                    <option value="Skincare">Skincare</option>
+                    <option value="Recovery">Recovery</option>
+                    <option value="Wellness">Wellness</option>
+                  </select>
+                ) : (
+                  <p className="text-gray-900">{product.category}</p>
                 )}
               </div>
               

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Calendar, Package, FileText, Phone, Mail, MessageSquare, ClipboardList } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Package, FileText, Phone, Mail, MessageSquare, ClipboardList, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Consumer {
   id: number;
@@ -33,6 +34,7 @@ export function ConsumerDetails() {
   const navigate = useNavigate();
   const [consumer, setConsumer] = useState<Consumer | null>(null);
   const [isActive, setIsActive] = useState(true);
+  const [selectedSubmission, setSelectedSubmission] = useState<string | null>(null);
 
   useEffect(() => {
     // Mock data - in real app this would come from API
@@ -200,42 +202,128 @@ export function ConsumerDetails() {
         
         {/* Activity & Forms */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Eligibility Questionnaire */}
+          {/* Questionnaire Submissions */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <MessageSquare className="h-5 w-5" />
-                <span>Eligibility Questionnaire Answers</span>
+                <span>Questionnaire Submissions</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {eligibilityAnswers.map((qa, index) => (
-                  <div key={index} className="p-4 border rounded-lg bg-gray-50">
-                    <p className="font-medium text-gray-900 mb-2">{qa.question}</p>
-                    <p className="text-gray-700">{qa.answer}</p>
+              <div className="space-y-3">
+                <div 
+                  className="p-4 border rounded-lg bg-green-50 cursor-pointer hover:bg-green-100 transition-colors"
+                  onClick={() => setSelectedSubmission('eligibility')}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">General Questionnaire</p>
+                      <p className="text-sm text-gray-600">Completed on 2024-01-14</p>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800">Submitted</Badge>
+                  </div>
+                </div>
+                
+                <div 
+                  className="p-4 border rounded-lg bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors"
+                  onClick={() => setSelectedSubmission('weight-management')}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">Weight Management Intake Form</p>
+                      <p className="text-sm text-gray-600">Completed on 2024-01-15</p>
+                    </div>
+                    <Badge className="bg-blue-100 text-blue-800">Submitted</Badge>
+                  </div>
+                </div>
+
+                <div 
+                  className="p-4 border rounded-lg bg-purple-50 cursor-pointer hover:bg-purple-100 transition-colors"
+                  onClick={() => setSelectedSubmission('wellness')}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">Wellness Intake Form</p>
+                      <p className="text-sm text-gray-600">Completed on 2024-01-16</p>
+                    </div>
+                    <Badge className="bg-purple-100 text-purple-800">Submitted</Badge>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Consultation History */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Consultation History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {consultationHistory.map((consultation, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{consultation.type}</p>
+                      <p className="text-sm text-gray-600">{consultation.product}</p>
+                      <p className="text-sm text-gray-500">{consultation.date}</p>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800">
+                      {consultation.status}
+                    </Badge>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
-
-          {/* Intake Form */}
+          {/* Questionnaire Submissions */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <ClipboardList className="h-5 w-5" />
-                <span>Intake Form Answers</span>
+                <MessageSquare className="h-5 w-5" />
+                <span>Questionnaire Submissions</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {intakeAnswers.map((qa, index) => (
-                  <div key={index} className="p-4 border rounded-lg bg-blue-50">
-                    <p className="font-medium text-gray-900 mb-2">{qa.question}</p>
-                    <p className="text-gray-700">{qa.answer}</p>
+              <div className="space-y-3">
+                <div 
+                  className="p-4 border rounded-lg bg-green-50 cursor-pointer hover:bg-green-100 transition-colors"
+                  onClick={() => setSelectedSubmission('eligibility')}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">General Questionnaire</p>
+                      <p className="text-sm text-gray-600">Completed on 2024-01-14</p>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800">Submitted</Badge>
                   </div>
-                ))}
+                </div>
+                
+                <div 
+                  className="p-4 border rounded-lg bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors"
+                  onClick={() => setSelectedSubmission('weight-management')}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">Weight Management Intake Form</p>
+                      <p className="text-sm text-gray-600">Completed on 2024-01-15</p>
+                    </div>
+                    <Badge className="bg-blue-100 text-blue-800">Submitted</Badge>
+                  </div>
+                </div>
+
+                <div 
+                  className="p-4 border rounded-lg bg-purple-50 cursor-pointer hover:bg-purple-100 transition-colors"
+                  onClick={() => setSelectedSubmission('wellness')}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">Wellness Intake Form</p>
+                      <p className="text-sm text-gray-600">Completed on 2024-01-16</p>
+                    </div>
+                    <Badge className="bg-purple-100 text-purple-800">Submitted</Badge>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -264,6 +352,50 @@ export function ConsumerDetails() {
           </Card>
         </div>
       </div>
+
+      {/* Submission Details Modal */}
+      <Dialog open={!!selectedSubmission} onOpenChange={() => setSelectedSubmission(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedSubmission === 'eligibility' && 'General Questionnaire Answers'}
+              {selectedSubmission === 'weight-management' && 'Weight Management Intake Form Answers'}
+              {selectedSubmission === 'wellness' && 'Wellness Intake Form Answers'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {selectedSubmission === 'eligibility' && eligibilityAnswers.map((qa, index) => (
+              <div key={index} className="p-4 border rounded-lg bg-gray-50">
+                <p className="font-medium text-gray-900 mb-2">{qa.question}</p>
+                <p className="text-gray-700">{qa.answer}</p>
+              </div>
+            ))}
+            {selectedSubmission === 'weight-management' && intakeAnswers.map((qa, index) => (
+              <div key={index} className="p-4 border rounded-lg bg-blue-50">
+                <p className="font-medium text-gray-900 mb-2">{qa.question}</p>
+                <p className="text-gray-700">{qa.answer}</p>
+              </div>
+            ))}
+            {selectedSubmission === 'wellness' && (
+              <div className="space-y-4">
+                <div className="p-4 border rounded-lg bg-purple-50">
+                  <p className="font-medium text-gray-900 mb-2">What are your primary wellness goals?</p>
+                  <p className="text-gray-700">I want to improve my overall energy levels and sleep quality. I've been feeling tired during the day and having trouble sleeping at night.</p>
+                </div>
+                <div className="p-4 border rounded-lg bg-purple-50">
+                  <p className="font-medium text-gray-900 mb-2">Do you have any specific health concerns?</p>
+                  <p className="text-gray-700">Occasional stress and mild anxiety, especially during work hours.</p>
+                </div>
+                <div className="p-4 border rounded-lg bg-purple-50">
+                  <p className="font-medium text-gray-900 mb-2">Are you currently taking any supplements?</p>
+                  <p className="text-gray-700">Vitamin D and a basic multivitamin</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }

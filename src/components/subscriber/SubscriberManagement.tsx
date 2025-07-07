@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import {
   Table,
   TableBody,
@@ -20,7 +21,8 @@ interface Subscriber {
   name: string;
   email: string;
   products: string[];
-  status: string;
+  subscriptionStatus: string;
+  accountStatus: string;
   joinDate: string;
   lastActivity: string;
   totalSpent: string;
@@ -37,7 +39,8 @@ export function SubscriberManagement() {
       name: 'Sarah Johnson',
       email: 'sarah.johnson@email.com',
       products: ['Weight Management', 'Wellness'],
-      status: 'active',
+      subscriptionStatus: 'active',
+      accountStatus: 'active',
       joinDate: '2024-01-15',
       lastActivity: '2 days ago',
       totalSpent: '$450'
@@ -47,7 +50,8 @@ export function SubscriberManagement() {
       name: 'Mike Chen',
       email: 'mike.chen@email.com',
       products: ['Hormone Therapy'],
-      status: 'active',
+      subscriptionStatus: 'active',
+      accountStatus: 'active',
       joinDate: '2024-02-03',
       lastActivity: '1 week ago',
       totalSpent: '$320'
@@ -57,7 +61,8 @@ export function SubscriberManagement() {
       name: 'Emma Davis',
       email: 'emma.davis@email.com',
       products: ['Skincare Treatment'],
-      status: 'inactive',
+      subscriptionStatus: 'cancelled',
+      accountStatus: 'inactive',
       joinDate: '2024-01-28',
       lastActivity: '2 weeks ago',
       totalSpent: '$180'
@@ -67,7 +72,8 @@ export function SubscriberManagement() {
       name: 'James Wilson',
       email: 'james.wilson@email.com',
       products: ['Recovery', 'Weight Management'],
-      status: 'active',
+      subscriptionStatus: 'active',
+      accountStatus: 'active',
       joinDate: '2024-01-10',
       lastActivity: '3 days ago',
       totalSpent: '$680'
@@ -77,7 +83,8 @@ export function SubscriberManagement() {
       name: 'Lisa Rodriguez',
       email: 'lisa.rodriguez@email.com',
       products: ['Hormone Therapy', 'Wellness'],
-      status: 'paused',
+      subscriptionStatus: 'paused',
+      accountStatus: 'active',
       joinDate: '2024-02-10',
       lastActivity: '5 days ago',
       totalSpent: '$540'
@@ -87,21 +94,37 @@ export function SubscriberManagement() {
   const filteredSubscribers = subscribers.filter(subscriber => {
     const matchesSearch = subscriber.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          subscriber.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || subscriber.status === filterStatus;
+    const matchesFilter = filterStatus === 'all' || subscriber.accountStatus === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
-  const getStatusColor = (status: string) => {
+  const getSubscriptionStatusColor = (status: string) => {
     switch (status) {
       case 'active':
         return 'bg-green-100 text-green-800';
-      case 'inactive':
-        return 'bg-gray-100 text-gray-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
       case 'paused':
         return 'bg-yellow-100 text-yellow-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const getAccountStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-blue-100 text-blue-800';
+      case 'inactive':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleAccountStatusToggle = (subscriberId: number, newStatus: string) => {
+    // This would typically update via API call
+    console.log(`Updating subscriber ${subscriberId} account status to ${newStatus}`);
   };
 
   const handleViewPatient = (patient: Subscriber) => {
@@ -111,10 +134,10 @@ export function SubscriberManagement() {
   const handleExportCSV = () => {
     // Simulate CSV export
     const csvData = filteredSubscribers.map(sub => 
-      `${sub.name},${sub.email},${sub.products.join(';')},${sub.status},${sub.joinDate},${sub.totalSpent}`
+      `${sub.name},${sub.email},${sub.products.join(';')},${sub.accountStatus},${sub.joinDate},${sub.totalSpent}`
     ).join('\n');
     
-    const blob = new Blob([`Name,Email,Products,Status,Join Date,Total Spent\n${csvData}`], 
+    const blob = new Blob([`Name,Email,Products,Account Status,Join Date,Total Spent\n${csvData}`], 
       { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -193,9 +216,8 @@ export function SubscriberManagement() {
                 onChange={(e) => setFilterStatus(e.target.value)}
               >
                 <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="paused">Paused</option>
+                <option value="active">Active Account</option>
+                <option value="inactive">Inactive Account</option>
               </select>
             </div>
           </div>
@@ -215,7 +237,8 @@ export function SubscriberManagement() {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Products</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Subscription Status</TableHead>
+                  <TableHead>Account Status</TableHead>
                   <TableHead>Join Date</TableHead>
                   <TableHead>Last Activity</TableHead>
                   <TableHead>Total Spent</TableHead>
@@ -237,9 +260,22 @@ export function SubscriberManagement() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(subscriber.status)}>
-                        {subscriber.status}
+                      <Badge className={getSubscriptionStatusColor(subscriber.subscriptionStatus)}>
+                        {subscriber.subscriptionStatus}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={subscriber.accountStatus === 'active'}
+                          onCheckedChange={(checked) => 
+                            handleAccountStatusToggle(subscriber.id, checked ? 'active' : 'inactive')
+                          }
+                        />
+                        <Badge className={getAccountStatusColor(subscriber.accountStatus)}>
+                          {subscriber.accountStatus}
+                        </Badge>
+                      </div>
                     </TableCell>
                     <TableCell className="text-gray-500">{subscriber.joinDate}</TableCell>
                     <TableCell className="text-gray-500">{subscriber.lastActivity}</TableCell>
