@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { Search, Download, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +14,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { PatientProfile } from './PatientProfile';
 
 interface Subscriber {
   id: number;
@@ -29,7 +29,7 @@ interface Subscriber {
 export function SubscriberManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [viewingPatient, setViewingPatient] = useState<Subscriber | null>(null);
+  const navigate = useNavigate();
 
   const subscribers: Subscriber[] = [
     {
@@ -105,7 +105,7 @@ export function SubscriberManagement() {
   };
 
   const handleViewPatient = (patient: Subscriber) => {
-    setViewingPatient(patient);
+    navigate(`/consumer/${patient.id}`);
   };
 
   const handleExportCSV = () => {
@@ -261,13 +261,6 @@ export function SubscriberManagement() {
         </CardContent>
       </Card>
 
-      {/* Consumer Profile Modal */}
-      {viewingPatient && (
-        <PatientProfile 
-          patient={viewingPatient} 
-          onClose={() => setViewingPatient(null)} 
-        />
-      )}
     </div>
   );
 }

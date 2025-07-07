@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 
 interface Category {
   id: number;
@@ -17,15 +18,16 @@ interface Category {
   order: number;
   color: string;
   isPopular?: boolean;
+  isActive: boolean;
 }
 
 export function CategoryManagement() {
   const [categories, setCategories] = useState<Category[]>([
-    { id: 1, name: 'Weight Loss', description: 'Products to help with weight management and metabolism', productCount: 5, order: 1, color: 'bg-blue-100 text-blue-800' },
-    { id: 2, name: 'Hormone Therapy', description: 'Hormone replacement and balance treatments', productCount: 8, order: 2, color: 'bg-green-100 text-green-800' },
-    { id: 3, name: 'Skincare', description: 'Advanced skincare and anti-aging solutions', productCount: 3, order: 3, color: 'bg-purple-100 text-purple-800' },
-    { id: 4, name: 'Recovery', description: 'Recovery and wellness optimization products', productCount: 4, order: 4, color: 'bg-orange-100 text-orange-800' },
-    { id: 5, name: 'Wellness', description: 'General wellness and preventive care', productCount: 6, order: 5, color: 'bg-pink-100 text-pink-800' }
+    { id: 1, name: 'Weight Loss', description: 'Products to help with weight management and metabolism', productCount: 5, order: 1, color: 'bg-blue-100 text-blue-800', isActive: true },
+    { id: 2, name: 'Hormone Therapy', description: 'Hormone replacement and balance treatments', productCount: 8, order: 2, color: 'bg-green-100 text-green-800', isActive: true },
+    { id: 3, name: 'Skincare', description: 'Advanced skincare and anti-aging solutions', productCount: 3, order: 3, color: 'bg-purple-100 text-purple-800', isActive: true },
+    { id: 4, name: 'Recovery', description: 'Recovery and wellness optimization products', productCount: 4, order: 4, color: 'bg-orange-100 text-orange-800', isActive: false },
+    { id: 5, name: 'Wellness', description: 'General wellness and preventive care', productCount: 6, order: 5, color: 'bg-pink-100 text-pink-800', isActive: true, isPopular: true }
   ]);
 
   const [editingCategory, setEditingCategory] = useState<number | null>(null);
@@ -34,6 +36,7 @@ export function CategoryManagement() {
   const [newCategoryPhoto, setNewCategoryPhoto] = useState<File | null>(null);
   const [newCategoryPhotoPreview, setNewCategoryPhotoPreview] = useState<string>('');
   const [newCategoryIsPopular, setNewCategoryIsPopular] = useState(false);
+  const [newCategoryIsActive, setNewCategoryIsActive] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [editingName, setEditingName] = useState('');
 
@@ -64,7 +67,8 @@ export function CategoryManagement() {
         productCount: 0,
         order: categories.length + 1,
         color: 'bg-gray-100 text-gray-800',
-        isPopular: newCategoryIsPopular
+        isPopular: newCategoryIsPopular,
+        isActive: newCategoryIsActive
       };
       setCategories([...categories, newCategory]);
       setNewCategoryName('');
@@ -72,6 +76,7 @@ export function CategoryManagement() {
       setNewCategoryPhoto(null);
       setNewCategoryPhotoPreview('');
       setNewCategoryIsPopular(false);
+      setNewCategoryIsActive(true);
       setIsAdding(false);
     }
   };
@@ -201,15 +206,28 @@ export function CategoryManagement() {
                 </div>
               </div>
               
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="isPopular"
-                  checked={newCategoryIsPopular}
-                  onCheckedChange={(checked) => setNewCategoryIsPopular(checked as boolean)}
-                />
-                <label htmlFor="isPopular" className="text-sm font-medium text-gray-700">
-                  Mark as Popular Category
-                </label>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="isPopular"
+                    checked={newCategoryIsPopular}
+                    onCheckedChange={(checked) => setNewCategoryIsPopular(checked as boolean)}
+                  />
+                  <label htmlFor="isPopular" className="text-sm font-medium text-gray-700">
+                    Mark as Popular Category
+                  </label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="isActive"
+                    checked={newCategoryIsActive}
+                    onCheckedChange={(checked) => setNewCategoryIsActive(checked)}
+                  />
+                  <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
+                    Active Category
+                  </label>
+                </div>
               </div>
               
               <div className="flex gap-2 pt-4">
@@ -226,6 +244,7 @@ export function CategoryManagement() {
                     setNewCategoryPhoto(null);
                     setNewCategoryPhotoPreview('');
                     setNewCategoryIsPopular(false);
+                    setNewCategoryIsActive(true);
                   }}
                 >
                   <X className="h-4 w-4 mr-2" />
@@ -298,6 +317,9 @@ export function CategoryManagement() {
                              {category.isPopular && (
                                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                              )}
+                             <Badge className={category.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                               {category.isActive ? 'Active' : 'Inactive'}
+                             </Badge>
                            </div>
                            <span className="text-sm text-gray-500">
                              {category.productCount} products
